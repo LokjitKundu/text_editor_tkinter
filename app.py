@@ -10,6 +10,9 @@ class NotepadGui(tk.Tk):
         self.geometry("600x400")
         self.title("Notepad")
         self.file_path=None
+        self.font_size=10
+        self.show_status_bar=tk.BooleanVar(value=True) # object linked to the "Status Bar" checkbutton; True = checked, False = unchecked
+
         self.text_box()
         self.menu_bar()
         self.set_icon()
@@ -173,16 +176,35 @@ class NotepadGui(tk.Tk):
         self.text_area.see(last_char_index) # automatically scroll to last_char_index
     
     def zoom_in(self):
-        pass
+        if self.font_size==72:
+            return
+        self.font_size+=1
+        self.text_area.config(font=f"consolas {self.font_size}")
     
     def zoom_out(self):
-        pass
+        if self.font_size==8:
+            return
+        self.font_size-=1
+        self.text_area.config(font=f"consolas {self.font_size}")
     
     def default_zoom(self):
-        pass
+        self.font_size=10
+        self.text_area.config(font=f"consolas {self.font_size}")
+
+    def update_status_bar(self,event=None):
+
+        line,column=self.text_area.index("insert").split(".")
+        self.status_label.config(text=f"Line {line}, Column {column}")
     
     def status_bar(self):
-        pass
+        # if checkbutton is ticked
+        if self.show_status_bar.get():
+            self.status_label.pack(side="bottom",fill="x")
+            self.update_status_bar()
+        # if checkbutton is not ticked
+        else:
+            self.status_label.pack_forget() # hides a widget that was packed using pack()
+            
 
     def set_icon(self):
 
@@ -235,7 +257,7 @@ class NotepadGui(tk.Tk):
         self.zoom_submenu.add_command(label="Restore default zoom",command=self.default_zoom)
         self.view_menu.add_cascade(label="Zoom",menu=self.zoom_submenu)
 
-        self.view_menu.add_checkbutton(label="Status bar",command=self.status_bar)   
+        self.view_menu.add_checkbutton(label="Status bar",command=self.status_bar,variable=self.show_status_bar) # keeps track of the checkbutton state
         
         menu_bar.add_cascade(label="View",menu=self.view_menu)
         
@@ -246,14 +268,20 @@ class NotepadGui(tk.Tk):
         frame=tk.Frame(self)
         frame.pack(fill="both",expand=True)
 
-        #scroll bar
+        # scroll bar
         scroll_bar=tk.Scrollbar(frame)
         scroll_bar.pack(side="right",fill="y")
-        #text area
-        self.text_area=tk.Text(frame,font="consolas 10",yscrollcommand=scroll_bar.set,undo=True)
+        # text area
+        self.text_area=tk.Text(frame,font=f"consolas {self.font_size}",yscrollcommand=scroll_bar.set,undo=True)
         self.text_area.pack(side="left",fill="both",expand=True)
         
         scroll_bar.config(command=self.text_area.yview)
+        # status bar
+        self.status_label=tk.Label(self,text="Line 1, Column 0",anchor="w")
+        self.status_label.pack(side="bottom",fill="x") # by default the status bar is visible
+
+        self.text_area.bind("<KeyRelease>",self.update_status_bar)
+        self.text_area.bind("ButtonRelease>",self.update_status_bar)
 
 if __name__=="__main__":
     gui=NotepadGui()

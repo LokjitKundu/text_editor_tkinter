@@ -123,7 +123,7 @@ class NotepadGui(tk.Tk):
 
         line_num=sd.askinteger("Go To Line","Enter line number:") # returns None if pressed cancel or close button
         
-        if not line_num:
+        if line_num is None:
             return
         # line number starts from 1 in tkinter, less than that is invalid
         if line_num<=0:

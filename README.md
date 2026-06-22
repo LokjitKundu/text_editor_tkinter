@@ -1,36 +1,31 @@
 # Text Editor
 
-A simple text editor built using Python and Tkinter.
+A simple text editor built using Python and Tkinter, replicating notepad.
 
 ## Features
 
-* Create a new document
-* Open existing text files
-* Save files
-* Save files with a new name (Save As)
-* Undo changes
-* Redo changes
-* Cut text
-* Copy text
-* Paste text
-* Select all text
+* Create, open, save, and save text files with a new name (Save As)
+* Print files using the system print command
+* Undo and redo support
+* Cut, copy, paste, delete, and select-all operations
 * Go To Line navigation
 * Dynamic menu state management
-
   * Cut and Copy are disabled when the editor is empty
   * Paste is disabled when the clipboard is empty
-* Vertical scrollbar
+  * Delete is disabled when no text is selected
+* Error handling for unsupported file types and text encodings
+* Vertical scrollbar for document navigation
 * Custom application icon
 
-## Note
+## Planned Features
 
-The following features are currently under development:
+The following features are planned for future updates:
 
-* Delete selected text
 * Zoom In / Zoom Out
 * Restore Default Zoom
 * Status Bar
-* Print Support
+* Unsaved File Indicator (*)
+* Keyboard Shortcuts
 
 ## Screenshot
 

@@ -14,8 +14,16 @@ class NotepadGui(tk.Tk):
         self.menu_bar()
         self.set_icon()
 
-    def check_textbox_state(self):
-        # Checks the text box state right before the menu drops down (empty or not)
+    def check_selection_status(self):
+        # if text is selected
+        if self.text_area.tag_ranges("sel"): 
+            self.edit_menu.entryconfig("Delete",state="normal")
+        #if nothing is selected
+        else:
+            self.edit_menu.entryconfig("Delete",state="disabled")
+
+    def check_textbox(self):
+        # Checks the text box right before the menu drops down (empty or not)
         if not self.text_area.get("1.0","end-1c"):
             self.edit_menu.entryconfig("Cut",state="disabled")
             self.edit_menu.entryconfig("Copy",state="disabled")
@@ -23,7 +31,7 @@ class NotepadGui(tk.Tk):
             self.edit_menu.entryconfig("Cut",state="normal")
             self.edit_menu.entryconfig("Copy",state="normal")
 
-    def check_clipboard_state(self):
+    def check_clipboard(self):
         # Checks the clipboard right before menu drops down (empty or not)
         try:
             # Tries to get clipboard text
@@ -39,8 +47,9 @@ class NotepadGui(tk.Tk):
             self.edit_menu.entryconfig("Paste",state="disabled")
             
     def combined_func(self):
-        self.check_clipboard_state() # checks if the clipboard contains text and enables/disables the paste menu accordingly
-        self.check_textbox_state() # checks if the text area contains text and enables/disables cut and paste menu accordingly
+        self.check_clipboard() # checks if the clipboard contains text and enables/disables the "paste" menu accordingly
+        self.check_textbox() # checks if the text area contains text and enables/disables "cut" and "copy" menu accordingly
+        self.check_selection_status() # checks if any text is selected or not abd enables/disables "delete" menu accordingly
 
     def new_file(self):
         # deletes the text of text_area 
@@ -56,11 +65,14 @@ class NotepadGui(tk.Tk):
             self.file_path=None
             return
         #if user clicks open
-        self.title(os.path.basename(self.file_path)+" - Notepad") # returns the file name from a file path
-        self.text_area.delete("1.0","end") # clears current content
-        with open (self.file_path,"r") as f:
-            self.text_area.insert("1.0",f.read()) # reads the file and inserts into notepad
-                
+        try:
+            self.title(os.path.basename(self.file_path)+" - Notepad") # returns the file name from a file path
+            self.text_area.delete("1.0","end") # clears current content
+            with open (self.file_path,"r") as f:
+                self.text_area.insert("1.0",f.read()) # reads the file and inserts into notepad
+        except UnicodeDecodeError:
+            msg.showerror("Notepad","This file cannot be opened as plain text")
+
     def save_file(self):
         # if the current document does not have a file path
         if not self.file_path:
@@ -88,8 +100,14 @@ class NotepadGui(tk.Tk):
 
     
     def print_file(self):
-        pass
-    
+        if not self.file_path:
+            msg.showerror("Notepad","Please save the file before printing")
+            return
+        try:
+            os.startfile(self.file_path,"print")
+        except OSError:
+            msg.showerror("Notepad","This file type is not supported")
+            
     def quit_app(self):
         # permanently closes the application window
         self.destroy()
@@ -116,9 +134,12 @@ class NotepadGui(tk.Tk):
         self.text_area.event_generate(("<<Paste>>"))
     
     def delete(self):
-        # incomplete
-        self.text_area.delete("1.0","end")
-    
+
+        try:
+            self.text_area.delete("sel.first","sel.last")
+        except tk.TclError:
+            return
+        
     def go_to(self):
 
         line_num=sd.askinteger("Go To Line","Enter line number:") # returns None if pressed cancel or close button

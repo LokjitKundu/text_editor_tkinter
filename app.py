@@ -1,5 +1,7 @@
 import tkinter as tk
-from tkinter import filedialog as fd
+from tkinter import filedialog as fd, simpledialog as sd
+from tkinter import messagebox as msg
+
 import os
 
 class NotepadGui(tk.Tk):
@@ -93,8 +95,17 @@ class NotepadGui(tk.Tk):
         self.destroy()
     
     def undo(self):
-        pass
-    
+        try:
+            self.text_area.edit_undo()
+        except tk.TclError:
+            return
+        
+    def redo(self):
+        try:
+            self.text_area.edit_redo()
+        except tk.TclError:
+            return
+
     def cut(self):
         self.text_area.event_generate(("<<Cut>>"))
     
@@ -105,13 +116,40 @@ class NotepadGui(tk.Tk):
         self.text_area.event_generate(("<<Paste>>"))
     
     def delete(self):
-        pass
+        # incomplete
+        self.text_area.delete("1.0","end")
     
     def go_to(self):
-        pass
+
+        line_num=sd.askinteger("Go To Line","Enter line number:") # returns None if pressed cancel or close button
+        
+        if not line_num:
+            return
+        # line number starts from 1 in tkinter, less than that is invalid
+        if line_num<=0:
+            msg.showwarning("Notepad","Please enter a positive line number")
+            return
+        
+        target_index=f"{line_num}.0" # text index format - line.character
+
+        # checks if inputted line num exceeds last last line num
+        last_line_num=int(self.text_area.index("end-1c").split(".")[0]) 
+        if last_line_num<line_num:
+            msg.showwarning("Notepad","The line number is beyond total number of lines")
+            return
+            
+        self.text_area.focus_set() # moves keyboard focus to text_area
+        self.text_area.mark_set("insert",target_index) # insert refers to "the blinking cursor", moves the cursor to target_index
+        self.text_area.see(target_index) # automatically scroll to target_index
     
     def select_all(self):
-        pass
+        # selects all
+        self.text_area.tag_add("sel","1.0","end")
+        
+        last_char_index=self.text_area.index("end-1c") 
+        self.text_area.mark_set("insert",last_char_index) # moves the cursor to last_char_index
+        self.text_area.focus_set() # moves keyboard focus to text_area
+        self.text_area.see(last_char_index) # automatically scroll to last_char_index
     
     def zoom_in(self):
         pass
@@ -155,6 +193,7 @@ class NotepadGui(tk.Tk):
         self.edit_menu=tk.Menu(menu_bar,tearoff=0,postcommand=self.combined_func) # postcommand pauses the menu from rendering for microsecond and checks textbox is empty or not
 
         self.edit_menu.add_command(label="Undo",command=self.undo)
+        self.edit_menu.add_command(label="Redo",command=self.redo)
         self.edit_menu.add_command(label="Cut",command=self.cut)
         self.edit_menu.add_command(label="Copy",command=self.copy)
         self.edit_menu.add_command(label="Paste",command=self.paste)
@@ -190,7 +229,7 @@ class NotepadGui(tk.Tk):
         scroll_bar=tk.Scrollbar(frame)
         scroll_bar.pack(side="right",fill="y")
         #text area
-        self.text_area=tk.Text(frame,font="consolas 10",yscrollcommand=scroll_bar.set)
+        self.text_area=tk.Text(frame,font="consolas 10",yscrollcommand=scroll_bar.set,undo=True)
         self.text_area.pack(side="left",fill="both",expand=True)
         
         scroll_bar.config(command=self.text_area.yview)

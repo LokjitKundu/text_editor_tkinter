@@ -9,6 +9,8 @@ A simple text editor built using Python and Tkinter, replicating notepad.
 * Undo and redo support
 * Cut, copy, paste, delete, and select-all operations
 * Go To Line navigation
+* Zoom In, Zoom Out, and Restore Default Zoom
+* Status Bar with line and column tracking
 * Dynamic menu state management
   * Cut and Copy are disabled when the editor is empty
   * Paste is disabled when the clipboard is empty
@@ -21,9 +23,6 @@ A simple text editor built using Python and Tkinter, replicating notepad.
 
 The following features are planned for future updates:
 
-* Zoom In / Zoom Out
-* Restore Default Zoom
-* Status Bar
 * Unsaved File Indicator (*)
 * Keyboard Shortcuts
 
